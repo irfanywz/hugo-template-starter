@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="{{ site.Language.Locale }}" dir="{{ or site.Language.Direction `ltr` }}">
+
+<head>
+    {{ block "config" . }}{{ end }} 
+
+    {{ partial "baseof/head.html" . }}
+
+    {{ partialCached "baseof/css.html" . }}
+
+    {{ block "head" . }}{{ end }}
+
+    {{ partialCached "baseof/js.html" . }}
+
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white transition-colors duration-200">
+    
+    {{ $hideHeader := .Scratch.Get "hideHeader" }}
+    {{ if not $hideHeader }}
+        {{ partial "baseof/header.html" . }}
+    {{ end }}
+
+    {{ block "main" . }}{{ end }}
+
+    {{ $hideFooter := .Scratch.Get "hideFooter" }}
+    {{ if not $hideFooter }}
+        {{ partial "baseof/footer.html" . }}
+    {{ end }}
+    
+
+    {{ if not $hideFooter }}
+        {{ partialCached "baseof/js-bottom.html" . }}
+    {{ end }}
+
+    {{ block "footer" . }}{{ end }}
+
+</body>
+
+</html>

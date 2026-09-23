@@ -1,0 +1,32 @@
+{{- $index := slice -}}
+{{- range .Site.RegularPages -}}
+  {{- if eq .Section "blog" -}}
+    {{- $img := "" -}}
+    {{- if .Params.image -}}
+      {{- with .Resources.GetMatch .Params.image -}}
+        {{- $img = .RelPermalink -}}
+      {{- else -}}
+        {{- with resources.Get .Params.image -}}
+          {{- $img = .RelPermalink -}}
+        {{- else -}}
+          {{- if or (strings.HasPrefix .Params.image "http") (strings.HasPrefix .Params.image "/") -}}
+            {{- $img = .Params.image -}}
+          {{- else -}}
+            {{- $img = printf "/%s" .Params.image | relURL -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $item := dict 
+      "title" .Title
+      "readingTime" .ReadingTime
+      "permalink" .RelPermalink
+      "section" .Section
+      "image" $img
+      "topics" (.Params.topics | default (slice))
+    -}}
+    {{- $index = $index | append $item -}}
+  {{- end -}}
+{{- end -}}
+{{- $index | jsonify -}}

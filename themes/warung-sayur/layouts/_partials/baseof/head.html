@@ -1,0 +1,113 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>
+{{ if .IsHome }}
+	{{ site.Title }}
+{{ else }}
+	{{ printf "%s | %s" .Title .Site.Params.title }}
+{{ end }}
+</title>
+
+<!-- Deskripsi & Author -->
+{{ $description := "" }}
+{{ if .IsHome }}
+	{{ $description = .Site.Params.description }}
+	<meta name="author" content="{{ .Site.Params.author }}" />
+{{ else if .Description }}
+	{{ $description = .Description }}
+{{ else if .Summary }}
+	{{ $description = .Summary | plainify | truncate 160 }}
+{{ end }}
+<meta name="description" content="{{ $description }}" />
+
+<!-- Keywords Dinamis (Mendukung .Params.keywords, .Params.topics, atau default situs) -->
+{{ $keywords := "" }}
+{{ if .Params.keywords }}
+    <!-- Jika keywords berupa slice/array, gabungkan dengan koma -->
+    {{ if reflect.IsSlice .Params.keywords }}
+        {{ $keywords = delimit .Params.keywords ", " }}
+    {{ else }}
+        {{ $keywords = .Params.keywords }}
+    {{ end }}
+{{ else if .Params.topics }}
+    <!-- Jika pakai topics, gabungkan dengan koma -->
+    {{ if reflect.IsSlice .Params.topics }}
+        {{ $keywords = delimit .Params.topics ", " }}
+    {{ else }}
+        {{ $keywords = .Params.topics }}
+    {{ end }}
+{{ end }}
+
+{{ if $keywords }}
+    <meta name="keywords" content="{{ $keywords }}" />
+{{ end }}
+
+{{ $noIndex := or (.Scratch.Get "noIndex") (eq .Params.noindex true) }}
+{{ if $noIndex }}
+	<meta name="robots" content="noindex" />
+	<meta name="googlebot" content="noindex" />
+{{ else }}
+	<meta name="robots" content="index, follow" />
+	<meta name="googlebot" content="index, follow" />
+{{ end }}
+
+<!-- Kontrol DNS Prefetch secara global (opsional) -->
+<meta http-equiv="x-dns-prefetch-control" content="on">
+
+<!-- DNS Prefetch untuk layanan Google & Firebase -->
+<link rel="dns-prefetch" href="//www.gstatic.com">
+<link rel="dns-prefetch" href="//fonts.gstatic.com">
+<link rel="dns-prefetch" href="//blogger.googleusercontent.com">
+
+<link rel="canonical" href="{{ .Permalink }}" itemprop="url" />
+<link rel="sitemap" type="application/xml" title="Sitemap" href='{{ "sitemap.xml" | absURL }}' />
+
+<meta name="google-site-verification" content="lDWGSmP0hlTFnz59wlaQqzwpVJeznar9HRdFtgZnnEI" />
+<meta name="google-adsense-account" content="ca-pub-2846006866814506">
+
+{{ if isset .Site.Params "favicon" }}
+	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="shortcut icon" href="/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+	<meta name="apple-mobile-web-app-title" content="irfanywz" />
+	<link rel="manifest" href="/site.webmanifest" />
+{{ end }}
+
+
+{{ with .OutputFormats.Get "RSS" }}
+  <link href="{{ .Permalink }}" rel="alternate" type="application/rss+xml" title="{{ $.Site.Title }}" />
+  <link href="{{ .Permalink }}" rel="feed" type="application/rss+xml" title="{{ $.Site.Title }}" />
+{{ end }}
+
+{{ $imgURL := "" }}
+{{ if .Params.images }}
+    {{ $imgURL = index .Params.images 0 | absURL }}
+{{ else if .Params.image }}
+    {{ $resImg := .Resources.GetMatch .Params.image }}
+    {{ $globImg := resources.Get .Params.image }}
+    
+    {{ if $resImg }}
+        {{ $imgURL = ($resImg.Resize "1000x avif").Permalink }}
+    {{ else if $globImg }}
+        {{ $imgURL = ($globImg.Resize "1000x avif").Permalink }}
+    {{ else }}
+        {{ $imgURL = .Params.image | absURL }}
+    {{ end }}
+{{ else }}
+    <!-- Fallback ke gambar default situs jika artikel tidak punya gambar -->
+    {{ $imgURL = "images/default-cover.avif" | absURL }}
+{{ end }}
+
+{{ if $imgURL }}
+    <meta property="og:image" content="{{ $imgURL }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:image" content="{{ $imgURL }}">
+    <meta name="twitter:card" content="summary_large_image">
+{{ end }}
+
+{{- template "_internal/schema.html" . -}}
+{{- template "_internal/opengraph.html" . -}}
+{{- template "_internal/twitter_cards.html" . -}}

@@ -1,0 +1,19 @@
+{{- $footerOpts := dict
+    "minify" (not hugo.IsDevelopment)
+    "sourceMap" (cond hugo.IsDevelopment "external" "")
+    "targetPath" "js/footer.min.js"
+}}
+
+{{- with resources.Get "js/footer.js" }}
+    {{- with . | js.Build $footerOpts }}
+        {{- if hugo.IsDevelopment }}
+            <script defer src="{{ .RelPermalink }}"></script>
+        {{- else }}
+            {{- with . | fingerprint }}
+                <script defer src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></script>
+            {{- end }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+
+<!-- {{ partial "google_analytics.html" . }} -->

@@ -1,0 +1,12 @@
+draft
+.idea
+.external
+.del
+public
+resources
+
+*.mp4
+.video
+
+node_modules
+plan
